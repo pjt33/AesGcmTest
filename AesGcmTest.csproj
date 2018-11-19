@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net471</TargetFramework>
+    <RootNamespace>AesGcmTest</RootNamespace>
+    <ProjectGuid>{D44B8611-570E-42ED-9B68-87FD6451EB7E}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="gcmtestvectors\gcmDecrypt128.rsp" />
+    <None Remove="gcmtestvectors\gcmDecrypt192.rsp" />
+    <None Remove="gcmtestvectors\gcmDecrypt256.rsp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="gcmtestvectors\gcmDecrypt128.rsp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="gcmtestvectors\gcmDecrypt192.rsp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="gcmtestvectors\gcmDecrypt256.rsp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Portable.BouncyCastle" Version="1.8.4" />
+  </ItemGroup>
+
+  </Project>
