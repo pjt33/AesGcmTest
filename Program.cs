@@ -2,6 +2,7 @@
 using Org.BouncyCastle.Crypto.Modes;
 using Org.BouncyCastle.Crypto.Parameters;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,7 @@ namespace AesGcmTest
         private static int testsFailedCNG = 0;
         private static int testsPassedBC = 0;
         private static int testsFailedBC = 0;
+        private static List<string> cngFailureReasons = new List<string>();
 
         static void Main(string[] args)
         {
@@ -47,7 +49,7 @@ namespace AesGcmTest
                             TestCNG(key, iv, aad, ciphertext, tag, plaintext);
                             TestBC(key, iv, aad, ciphertext, tag, plaintext);
 
-                            if ((testsPassedCNG + testsFailedCNG) % 1000 == 0) Console.WriteLine($"CNG\t{testsPassedCNG}\t{testsFailedCNG}\t\tBC\t{testsPassedBC}\t{testsFailedBC}");
+                            if ((testsPassedBC + testsFailedBC) % 225 == 0) Console.WriteLine($"CNG\t{testsPassedCNG}\t{testsFailedCNG}\t\tBC\t{testsPassedBC}\t{testsFailedBC}");
                             break;
 
                         // Ignore changes of length, comments, blank lines
@@ -56,7 +58,8 @@ namespace AesGcmTest
                 }
             }
 
-            Console.WriteLine($"CNG\t{testsPassedCNG}\t{testsFailedCNG}\t\tBC\t{testsPassedBC}\t{testsFailedBC}");
+            Console.WriteLine("CNG failure reasons:");
+            foreach (var grp in cngFailureReasons.GroupBy(str => str)) Console.WriteLine($"{grp.Count()}\t{grp.Key}");
         }
 
         private static void TestBC(byte[] key, byte[] iv, byte[] aad, byte[] ciphertext, byte[] tag, byte[] plaintext)
@@ -99,6 +102,7 @@ namespace AesGcmTest
                         // For KISS, don't bother with breaking ciphertext into blocks and chaining calls.
                         int outputSize;
                         byte[] output = new byte[ciphertext.Length];
+
                         var chainData = new byte[16]; // Block size: 128 bits
                         ErrorCode error = UnsafeNativeMethods.BCryptDecrypt(nativeKey, ciphertext, ciphertext.Length, ref authInfo, chainData, chainData.Length, output, output.Length, out outputSize, 0);
 
@@ -108,12 +112,20 @@ namespace AesGcmTest
 
                             // Decryption succeeded without tag mismatch
                             if (plaintext != null && plaintext.SequenceEqual(output)) testsPassedCNG++;
-                            else testsFailedCNG++;
+                            else
+                            {
+                                testsFailedCNG++;
+                                cngFailureReasons.Add("PT mismatch");
+                            }
                         }
                         else
                         {
                             if (plaintext == null) testsPassedCNG++;
-                            else testsFailedCNG++;
+                            else
+                            {
+                                testsFailedCNG++;
+                                cngFailureReasons.Add(error.ToString());
+                            }
                         }
                     }
                     finally

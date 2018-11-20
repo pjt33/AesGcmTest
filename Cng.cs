@@ -126,9 +126,14 @@ namespace AesGcmTest
 
     internal enum ErrorCode
     {
-        Success = 0x00000000,                         // STATUS_SUCCESS
-        AuthTagMismatch = unchecked((int)0xC000A002), // STATUS_AUTH_TAG_MISMATCH
-        BufferTooSmall = unchecked((int)0xC0000023),  // STATUS_BUFFER_TOO_SMALL
+        Success = 0x00000000,                           // STATUS_SUCCESS
+        AuthTagMismatch = unchecked((int)0xC000A002),   // STATUS_AUTH_TAG_MISMATCH
+        BufferTooSmall = unchecked((int)0xC0000023),    // STATUS_BUFFER_TOO_SMALL
+
+        InvalidBufferSize = unchecked((int)0xC0000206), // STATUS_INVALID_BUFFER_SIZE
+        InvalidHandle = unchecked((int)0xC0000008),     // STATUS_INVALID_HANDLE
+        InvalidParameter = unchecked((int)0xC000000D),  // STATUS_INVALID_PARAMETER
+        NotSupported = unchecked((int)0xC00000BB),      // STATUS_NOT_SUPPORTED
     }
 
     [Flags]
@@ -183,7 +188,7 @@ namespace AesGcmTest
         [SecurityCritical]
         private static void _Marshal(byte[] buf, out IntPtr ptr, out int len)
         {
-            if (buf != null)
+            if (buf != null && buf.Length > 0)
             {
                 len = buf.Length;
                 ptr = Marshal.AllocCoTaskMem(len);
